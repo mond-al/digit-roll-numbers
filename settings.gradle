@@ -1,0 +1,2 @@
+include ':digitcounter'
+include ':example'
