@@ -1,3 +1,3 @@
-# RecyclerView-fastscroller
-Very Simple FastScroller 
+# RecyclerView-digitCounter
+Very Simple digitCounter 
 # digit-counter-view
