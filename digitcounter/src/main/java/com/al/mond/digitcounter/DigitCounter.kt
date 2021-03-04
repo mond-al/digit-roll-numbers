@@ -28,48 +28,44 @@ class DigitCounter @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     @AttrRes defStyleAttr: Int = 0
 ) : RelativeLayout(context, attrs, defStyleAttr) {
+    private val counterHeight = resources.getDimensionPixelSize(R.dimen.digit_height)
     private var function: () -> Unit = {}
-    private val itemWidth = resources.getDimensionPixelSize(R.dimen.counter_digit_item_width)
-    private val itemHeight = resources.getDimensionPixelSize(R.dimen.counter_digit_item_height)
-    private val commaWidth = resources.getDimensionPixelSize(R.dimen.counter_digit_comma_width)
-    private val textSize = resources.getDimensionPixelSize(R.dimen.odo_meter_font_size)
+
+    private var digitCount: Int = 0
+    private var animatedCount = 0
 
     private val digits: LinearLayout
 
-    private val counterHeight = resources.getDimensionPixelSize(R.dimen.counter_height)
-
-
     init {
         inflate(context, R.layout.digit_counter, this)
-        digits = findViewById(R.id.digitCounter)
+        digits = findViewById(R.id.digits)
     }
 
-    fun set(value: Int, tic: Int = 1) {
+    fun set(input: Int, gap: Int = 1) {
         removeCallbacks(function)
         reset()
-        function = { setCounter(value, tic) }
+
+        function = { setCounter(input, gap) }
         post(function)
     }
 
-    private fun setCounter(input: Int, tic: Int) {
+    private fun setCounter(input: Int, gap: Int) {
         reset()
 
-        var before = input - tic
-        var number = input
-        
+        var before = input - gap
+        var after = input
+
         val afterPresentNumber = LinkedList<Int>()
         val beforePresentNumber = LinkedList<Int>()
 
 
-        if(number == 0){
+        if (after == 0) {
             afterPresentNumber.push(0)
             beforePresentNumber.push(0)
-        }else{
-            while (number > 0) {
-                afterPresentNumber.push(number % 10)
-                number /= 10
-            }
-            while (before > 0) {
+        } else {
+            while (after > 0) {
+                afterPresentNumber.push(after % 10)
+                after /= 10
                 beforePresentNumber.push(before % 10)
                 before /= 10
             }
@@ -79,13 +75,13 @@ class DigitCounter @JvmOverloads constructor(
             beforePresentNumber.add(0, 0)
         }
 
+        digitCount = afterPresentNumber.size
         for (index in 0 until afterPresentNumber.size) {
             addComma(index, afterPresentNumber.size)
             addDigit(
                 index,
                 beforePresentNumber[index],
-                afterPresentNumber[index],
-                afterPresentNumber.lastIndex == index
+                afterPresentNumber[index]
             )
         }
     }
@@ -93,35 +89,38 @@ class DigitCounter @JvmOverloads constructor(
     private fun addDigit(
         index: Int,
         before: Int,
-        after: Int,
-        isLast: Boolean
+        after: Int
     ) {
+        val targetItemPosition = animationRollCount(index) + before  // 자리수에따라 회전카운트가 늘어난다.
         val digit = RecyclerView(context)
-        digit.layoutParams = LinearLayout.LayoutParams(itemWidth, counterHeight)
+        digit.layoutParams = LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, counterHeight)
         digit.adapter = CounterNumberAdapter()
-        val layoutManager = LinearLayoutManager(context)
-        digit.layoutManager = layoutManager
+        digit.layoutManager = LinearLayoutManager(context)
         digit.tag = after.toString()
         digits.addView(digit)
-        val finalDigit = animationRollCount(index) + before  // 자리수에따라 회전카운트가 늘어난다.
 
-        if (isLast) {
-            digit.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                var oldState: Int = SCROLL_STATE_IDLE
-                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                    super.onScrollStateChanged(recyclerView, newState)
-                    if (oldState == SCROLL_STATE_FLING && newState == SCROLL_STATE_IDLE) {
-                        post { lastRoll() }
-                    }else {
-                        oldState = newState
-                    }
+        digit.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            var oldState: Int = SCROLL_STATE_IDLE
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (oldState == SCROLL_STATE_FLING && newState == SCROLL_STATE_IDLE) {
+                    digit.removeOnScrollListener(this)
+                    addDoneCounter()
                 }
-            })
-        }
+                oldState = newState
+            }
+        })
 
         digit.post {
-            val movementPos = finalDigit * itemHeight + (counterHeight + itemHeight) / 2
+            val movementPos = (targetItemPosition + 2) * counterHeight
             digit.smoothScrollBy(0, movementPos)
+        }
+    }
+
+    private fun addDoneCounter() {
+        animatedCount++
+        if (digitCount == animatedCount) {
+            addGapScroll()
         }
     }
 
@@ -133,20 +132,21 @@ class DigitCounter @JvmOverloads constructor(
     private fun addComma(index: Int, finalDigitSize: Int) {
         if ((finalDigitSize - index) % 3 == 0 && index != 0 && finalDigitSize != index) {
             val comma = TextView(context)
-            val params = LinearLayout.LayoutParams(commaWidth, itemHeight)
+            val params =
+                LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, counterHeight)
             params.gravity = Gravity.CENTER
             comma.layoutParams = params
             comma.text = ","
             comma.gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
             comma.includeFontPadding = false
             comma.setTypeface(comma.typeface, Typeface.BOLD)
-            comma.setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize * 0.8f)
-            comma.height = textSize
+            comma.setTextSize(TypedValue.COMPLEX_UNIT_PX, counterHeight * 0.8f)
+            comma.height = counterHeight
             digits.addView(comma)
         }
     }
 
-    private fun lastRoll() {
+    private fun addGapScroll() {
         for (digit in digits.children) {
             if ((digit is RecyclerView).not()) continue
             val currentPosition =
@@ -155,7 +155,7 @@ class DigitCounter @JvmOverloads constructor(
             val to = Integer.parseInt(digit.tag as String)
             val moveDistance = getDistance(from, to)
             if (from != to) {
-                digit.smoothScrollBy(0, itemHeight * moveDistance)
+                digit.smoothScrollBy(0, counterHeight * moveDistance)
             }
         }
     }
@@ -167,6 +167,8 @@ class DigitCounter @JvmOverloads constructor(
             to + 10 - from
 
     private fun reset() {
+        animatedCount = 0
+        digitCount = 0
         digits.removeAllViews()
     }
 

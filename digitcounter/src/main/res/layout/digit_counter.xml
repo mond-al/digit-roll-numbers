@@ -1,46 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="42dp">
+    android:layout_height="@dimen/digit_height">
     <LinearLayout
-        android:id="@+id/digitCounter"
+        android:id="@+id/digits"
         android:layout_width="wrap_content"
-        android:layout_height="42dp"
-        android:layout_centerVertical="true"
+        android:layout_height="match_parent"
         android:layout_centerHorizontal="true"
-        android:orientation="horizontal">
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/above"
-        android:layout_width="wrap_content"
-        android:layout_height="42dp"
-        android:layout_alignStart="@id/digitCounter"
-        android:layout_alignRight="@id/digitCounter"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="10dp"
-            android:layout_gravity="top"
-            android:background="#ffffff"
-            android:orientation="vertical">
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="10dp"
-            android:layout_gravity="bottom"
-            android:background="#ffffff"
-            android:orientation="vertical">
-
-        </LinearLayout>
-    </LinearLayout>
-
-
+        android:layout_centerVertical="true"
+        android:orientation="horizontal"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true" />
 </RelativeLayout>

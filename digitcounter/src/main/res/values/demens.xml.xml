@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="odo_meter_font_size">21dp</dimen>
-    <dimen name="counter_height">42dp</dimen>
-    <dimen name="counter_digit_item_width">15dp</dimen>
-    <dimen name="counter_digit_item_height">21dp</dimen>
-    <dimen name="counter_digit_comma_width">12dp</dimen>
+    <dimen name="digit_height">40dp</dimen>
 </resources>
