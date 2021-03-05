@@ -41,15 +41,14 @@ class DigitCounter @JvmOverloads constructor(
         digits = findViewById(R.id.digits)
     }
 
-    fun set(input: Int, gap: Int = 1) {
+    fun set(input: Int, gap: Int = 1, useComma: Boolean = true) {
         removeCallbacks(function)
         reset()
-
-        function = { setCounter(input, gap) }
+        function = { setCounter(input, gap, useComma) }
         post(function)
     }
 
-    private fun setCounter(input: Int, gap: Int) {
+    private fun setCounter(input: Int, gap: Int, useComma: Boolean) {
         reset()
 
         var before = input - gap
@@ -77,7 +76,8 @@ class DigitCounter @JvmOverloads constructor(
 
         digitCount = afterPresentNumber.size
         for (index in 0 until afterPresentNumber.size) {
-            addComma(index, afterPresentNumber.size)
+            if(useComma)
+                addComma(index, afterPresentNumber.size)
             addDigit(
                 index,
                 beforePresentNumber[index],

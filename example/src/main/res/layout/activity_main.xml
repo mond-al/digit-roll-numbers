@@ -15,14 +15,20 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.al.mond.digitcounter.DigitCounter
+            android:id="@+id/counter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/roll_btn"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/play"
         android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/play"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
